@@ -3,11 +3,12 @@
     "builder": "NIXPACKS",
     "config": {
       "nixpacks": {
-        "startCmd": "python bot_hellena.py"
+        "startCmd": "python bot_assistente.py"
       }
     }
   },
   "deploy": {
-    "startCommand": "python bot_hellena.py"
+    "startCommand": "python bot_assistente.py"
   }
 }
+
