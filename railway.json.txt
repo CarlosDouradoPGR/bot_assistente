@@ -1,0 +1,13 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "config": {
+      "nixpacks": {
+        "startCmd": "python bot_hellena.py"
+      }
+    }
+  },
+  "deploy": {
+    "startCommand": "python bot_hellena.py"
+  }
+}
