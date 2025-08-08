@@ -164,6 +164,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(f"⚠️ Erro no handle_message: {e}")
         await update.message.reply_text("❌ Ocorreu um erro ao processar sua mensagem. Tente novamente.")
+
+
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     save_message(user.id, "system", "Início de conversa")
@@ -204,6 +208,37 @@ async def get_deepseek_response(messages):
         print(f"Erro DeepSeek: {e}")
         return "Desculpe, ocorreu um erro ao processar sua solicitação."
 
+
+prompt_sistema = """
+Você é o *Assistente Comercial da CD Company*, especializado em produtos de açaí e frutas tropicais. 
+
+**Instruções:**
+1. Sempre responda de forma *clara* e *objetiva* 
+2. Use formatação Markdown simples (*negrito* para ênfase)
+3. Quando mencionar produtos, inclua:
+   - Nome do produto (*📦*)
+   - Preço base (*💰*) 
+   - Desconto máximo (*🔻*)
+4. Mantenha o tom *amigável* mas *profissional*
+
+**Dicas de formatação:**
+- `*texto*` para negrito
+- Evite emojis excessivos
+- Links: `[texto](URL)`
+
+**Exemplo de resposta:**
+*📦 Açaí Premium* (1KG)  
+*💰 Preço base:* R$ 59,90  
+*🔻 Desconto máximo:* 10%  
+*💵 Preço final:* R$ 53,91
+
+**Importante:** Se não souber a resposta, diga:  
+*"Vou verificar e te retorno. Poderia me enviar mais detalhes?"*
+"""
+
+
+
+
 async def main():
     application = ApplicationBuilder().token(TOKEN_TELEGRAM).build()
     
@@ -215,5 +250,6 @@ async def main():
 if __name__ == '__main__':
     nest_asyncio.apply()
     asyncio.run(main())
+
 
 
