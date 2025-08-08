@@ -65,7 +65,7 @@ def get_user_history(user_id, limit=6):
 
 
 def buscar_produto(texto):
-    conn = get_db_connection()
+    conn = db_connection
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("""
@@ -173,4 +173,5 @@ if __name__ == '__main__':
     nest_asyncio.apply()
 
     asyncio.run(main())
+
 
