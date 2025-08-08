@@ -16,13 +16,13 @@ nest_asyncio.apply()
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
 TOKEN_TELEGRAM = os.environ.get('TELEGRAM_TOKEN')
-DATABASE_URL = os.environ.get('DATABASE_URL')  # Usando a URL completa como no outro bot
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Função de conexão simplificada (igual ao seu outro bot)
+# Função de conexão com o banco de dados
 def db_connection():
     return psycopg2.connect(DATABASE_URL)
 
-# Funções do banco de dados atualizadas
+# Funções do banco de dados
 def save_message(user_id, role, content, produto_id=None):
     conn = db_connection()
     try:
@@ -55,17 +55,16 @@ def get_user_history(user_id, limit=6):
                 ORDER BY timestamp DESC 
                 LIMIT %s
             """, (user_id, limit))
-            return [{"role": row['role'], "content": row['content']} for row in cursor.fetchall()][::-1]
+            history = [{"role": row['role'], "content": row['content']} for row in cursor.fetchall()]
+            return history[::-1]  # Inverte para ordem cronológica
     except Exception as e:
         print(f"Erro ao buscar histórico: {e}")
         return []
     finally:
         conn.close()
 
-
-
 def buscar_produto(texto):
-    conn = db_connection
+    conn = db_connection()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("""
@@ -75,14 +74,14 @@ def buscar_produto(texto):
                 WHERE LOWER(produto) LIKE %s
                 ORDER BY produto
                 LIMIT 5
-                """, (f'%{texto.lower()}%',))
+            """, (f'%{texto.lower()}%',))
             return cursor.fetchall()
     except Exception as e:
         print(f"Erro ao buscar produto: {e}")
         return []
     finally:
-        release_db_connection(conn)
-		
+        conn.close()
+
 def formatar_resposta_produto(produto):
     return f"""
 *📦 {produto['produto']}* ({produto['capacidade']})
@@ -135,11 +134,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
-	
-def formatar_para_markdown(texto):
-    # Remove formatação potencialmente problemática
-    escape_chars = '_*[]()~`>#+-=|{}.!'
-    return ''.join(f'\\{char}' if char in escape_chars else char for char in texto)
 
 async def get_deepseek_response(messages):
     headers = {
@@ -160,7 +154,7 @@ async def get_deepseek_response(messages):
     except Exception as e:
         print(f"Erro DeepSeek: {e}")
         return "Desculpe, ocorreu um erro ao processar sua solicitação."
-		
+
 async def main():
     application = ApplicationBuilder().token(TOKEN_TELEGRAM).build()
     
@@ -171,7 +165,4 @@ async def main():
 
 if __name__ == '__main__':
     nest_asyncio.apply()
-
     asyncio.run(main())
-
-
