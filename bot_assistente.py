@@ -1,59 +1,51 @@
-import os
-from dotenv import load_dotenv
-import psycopg2
-from psycopg2 import pool
-from psycopg2.extras import DictCursor
-import pandas as pd
+# -*- coding: utf-8 -*-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-import requests
-import json
-import re
-import asyncio
-import nest_asyncio
 from datetime import datetime
+import os
+import asyncio
+import psycopg2
+import requests
+import nest_asyncio
+from psycopg2.extras import DictCursor
 
+# Configuração inicial
+nest_asyncio.apply()
 
-
-
-# Configurações da API
-DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
+# Variáveis de ambiente
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-TOKEN_TELEGRAM = os.getenv('TELEGRAM_TOKEN')
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
+TOKEN_TELEGRAM = os.environ.get('TELEGRAM_TOKEN')
+DATABASE_URL = os.environ.get('DATABASE_URL')  # Usando a URL completa como no outro bot
 
-def get_db_connection():
-    return postgres_pool.getconn()
+# Função de conexão simplificada (igual ao seu outro bot)
+def db_connection():
+    return psycopg2.connect(DATABASE_URL)
 
-def release_db_connection(conn):
-    postgres_pool.putconn(conn)
-
+# Funções do banco de dados atualizadas
 def save_message(user_id, role, content, produto_id=None):
-    conn = get_db_connection()
+    conn = db_connection()
     try:
         with conn.cursor() as cursor:
-            # Atualiza usuário ou cria novo
             cursor.execute("""
-                INSERT INTO users (user_id, first_name, username, last_interaction)
-                VALUES (%s, %s, %s, NOW())
+                INSERT INTO users (user_id, last_interaction)
+                VALUES (%s, NOW())
                 ON CONFLICT (user_id) DO UPDATE 
-                SET last_interaction = NOW(),
-                    first_name = EXCLUDED.first_name,
-                    username = EXCLUDED.username
-                """, (user_id, "Nome", "username"))  # Substitua por dados reais
+                SET last_interaction = NOW()
+            """, (user_id,))
             
-            # Salva a mensagem
             cursor.execute("""
                 INSERT INTO messages (user_id, role, content, produto_id)
                 VALUES (%s, %s, %s, %s)
-                """, (user_id, role, content, produto_id))
+            """, (user_id, role, content, produto_id))
         conn.commit()
     except Exception as e:
         print(f"Erro ao salvar mensagem: {e}")
     finally:
-        release_db_connection(conn)
+        conn.close()
 
 def get_user_history(user_id, limit=6):
-    conn = get_db_connection()
+    conn = db_connection()
     try:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute("""
@@ -62,14 +54,15 @@ def get_user_history(user_id, limit=6):
                 WHERE user_id = %s 
                 ORDER BY timestamp DESC 
                 LIMIT %s
-                """, (user_id, limit))
-            history = [{"role": row['role'], "content": row['content']} for row in cursor.fetchall()]
-            return history[::-1]  # Inverte para ordem cronológica
+            """, (user_id, limit))
+            return [{"role": row['role'], "content": row['content']} for row in cursor.fetchall()][::-1]
     except Exception as e:
         print(f"Erro ao buscar histórico: {e}")
         return []
     finally:
-        release_db_connection(conn)
+        conn.close()
+
+
 
 def buscar_produto(texto):
     conn = get_db_connection()
@@ -180,3 +173,4 @@ if __name__ == '__main__':
     nest_asyncio.apply()
 
     asyncio.run(main())
+
