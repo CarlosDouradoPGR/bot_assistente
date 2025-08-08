@@ -13,19 +13,8 @@ import asyncio
 import nest_asyncio
 from datetime import datetime
 
-# Carrega variáveis de ambiente
-load_dotenv()
 
-# Configuração do PostgreSQL Connection Pool
-postgres_pool = psycopg2.pool.SimpleConnectionPool(
-    minconn=1,
-    maxconn=10,
-    host=os.getenv('DB_HOST'),
-    database=os.getenv('DB_NAME'),
-    user=os.getenv('DB_USER'),
-    password=os.getenv('DB_PASSWORD'),
-    port=os.getenv('DB_PORT')
-)
+
 
 # Configurações da API
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
@@ -189,4 +178,5 @@ async def main():
 
 if __name__ == '__main__':
     nest_asyncio.apply()
+
     asyncio.run(main())
