@@ -23,21 +23,25 @@ def db_connection():
     return psycopg2.connect(DATABASE_URL)
 
 # Funções do banco de dados
-def save_message(user_id, role, content, produto_id=None):
+def save_message(update: Update, role: str, content: str, produto_id=None):
+    user = update.message.from_user
     conn = db_connection()
     try:
         with conn.cursor() as cursor:
+            # Usa os dados reais do usuário do Telegram
             cursor.execute("""
-                INSERT INTO users (user_id, last_interaction)
-                VALUES (%s, NOW())
+                INSERT INTO users (user_id, first_name, username, last_interaction)
+                VALUES (%s, %s, %s, NOW())
                 ON CONFLICT (user_id) DO UPDATE 
-                SET last_interaction = NOW()
-            """, (user_id,))
+                SET last_interaction = NOW(),
+                    first_name = COALESCE(EXCLUDED.first_name, users.first_name),
+                    username = COALESCE(EXCLUDED.username, users.username)
+            """, (user.id, user.first_name, user.username))
             
             cursor.execute("""
                 INSERT INTO messages (user_id, role, content, produto_id)
                 VALUES (%s, %s, %s, %s)
-            """, (user_id, role, content, produto_id))
+            """, (user.id, role, content, produto_id))
         conn.commit()
     except Exception as e:
         print(f"Erro ao salvar mensagem: {e}")
@@ -166,3 +170,4 @@ async def main():
 if __name__ == '__main__':
     nest_asyncio.apply()
     asyncio.run(main())
+
