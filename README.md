@@ -35,7 +35,7 @@ Você também pode conferir a estrutura completa em SQL neste arquivo → [sql.t
 ## Como testar?
 Você pode enviar uma mensagem pro bot atráves desse link:[💬 Converse com o bot no Telegram](https://t.me/CDAssit_bot)
 
-##Tecnologias utilizadas
+## Tecnologias utilizadas
 
 - Python
 - PostgreSQL
