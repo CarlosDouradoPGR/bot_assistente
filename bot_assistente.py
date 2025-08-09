@@ -102,6 +102,19 @@ def buscar_produto(texto: str, incluir_moedas=False) -> list:
         if conn:
             conn.close()
 
+def validar_markdown(texto: str) -> bool:
+    """Verifica se o texto contém markdown válido"""
+    if not isinstance(texto, str):
+        return False
+    return texto.count('*') % 2 == 0 and texto.count('_') % 2 == 0
+def formatar_resposta_produto(produto):
+    return f"""
+*📦 {produto['produto']}* ({produto['capacidade']})
+*💰 Preço base:* R$ {produto['preco_base']:.2f}
+*🔻 Desconto máximo:* {produto['desconto_max']}%
+*💵 Preço final:* R$ {produto['preco_final']:.2f}
+"""
+
 def formatar_resposta_produto(produto: dict, moedas=False) -> str:
     """Formata os dados do produto para mensagem Markdown"""
     if moedas:
@@ -462,3 +475,4 @@ async def main():
 if __name__ == '__main__':
     nest_asyncio.apply()
     asyncio.run(main())
+
