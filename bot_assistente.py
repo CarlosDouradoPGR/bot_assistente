@@ -202,31 +202,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ... (mantenha o restante do código igual: start, get_deepseek_response, main, etc.)
 
-# -*- coding: utf-8 -*-
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-from datetime import datetime
-import os
-import asyncio
-import psycopg2
-import requests
-import nest_asyncio
-import re
-from psycopg2.extras import DictCursor
-
-# Configuração inicial
-nest_asyncio.apply()
-
-# Variáveis de ambiente
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
-TOKEN_TELEGRAM = os.environ.get('TELEGRAM_TOKEN')
-DATABASE_URL = os.environ.get('DATABASE_URL')
-
-# Função de conexão com o banco de dados
-def db_connection():
-    return psycopg2.connect(DATABASE_URL)
-
 # Funções do banco de dados atualizadas
 def save_message(update: Update, role: str, content: str, produto_id=None):
     user = update.message.from_user
@@ -459,6 +434,13 @@ Você é o *Assistente Comercial da CD Company*, especializado em produtos de a�
 
 **Importante:** Se não souber a resposta, diga:  
 *"Vou verificar e te retorno. Poderia me enviar mais detalhes?"*
+
+## Regras Estritas:
+- NUNCA use `###` para títulos ou subtítulos
+- Use APENAS *asteriscos* para negrito
+- Organize por linhas com emojis como marcadores
+- Mantenha no máximo 2 linhas em branco entre grupos de produtos
+- Para listas longas, limite a 5 produtos por mensagem
 """
 
 
@@ -475,4 +457,5 @@ async def main():
 if __name__ == '__main__':
     nest_asyncio.apply()
     asyncio.run(main())
+
 
