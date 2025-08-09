@@ -22,6 +22,8 @@ Ele utiliza a API do DeepSeek para fornecer respostas mais precisas e humanizada
 O bot é integrado a um banco de dados PostgreSQL com a seguinte estrutura:
 
 <p align="center"> <img width="1112" height="196" alt="Estrutura do banco" src="https://github.com/user-attachments/assets/4d70fd12-64dc-4037-b4a0-84b7e993e76b" /> </p>
+
+
 Você também pode conferir a estrutura completa em SQL neste arquivo → [sql.txt](https://github.com/CarlosDouradoPGR/bot_assistente/blob/main/sql.txt)
 
 - O banco de dados serve como ponte entre a empresa e a IA:
