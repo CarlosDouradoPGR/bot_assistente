@@ -1,0 +1,59 @@
+CREATE TABLE "public"."pedidos" ( 
+  "id" SERIAL,
+  "user_id" BIGINT NOT NULL,
+  "data_pedido" TIMESTAMP NOT NULL DEFAULT now() ,
+  "status" VARCHAR(20) NOT NULL DEFAULT 'pendente'::character varying ,
+  "valor_total" NUMERIC NOT NULL,
+  "desconto_aplicado" NUMERIC NOT NULL DEFAULT 0 ,
+  "observacoes" TEXT NULL,
+  CONSTRAINT "pedidos_pkey" PRIMARY KEY ("id")
+);
+CREATE TABLE "public"."pedido_itens" ( 
+  "id" SERIAL,
+  "pedido_id" INTEGER NOT NULL,
+  "produto_id" INTEGER NOT NULL,
+  "quantidade" INTEGER NOT NULL DEFAULT 1 ,
+  "preco_unitario" NUMERIC NOT NULL,
+  "desconto_aplicado" NUMERIC NULL DEFAULT 0 ,
+  CONSTRAINT "pedido_itens_pkey" PRIMARY KEY ("id")
+);
+CREATE TABLE "public"."users" ( 
+  "user_id" BIGINT NOT NULL,
+  "first_name" VARCHAR(100) NOT NULL,
+  "username" VARCHAR(100) NULL,
+  "last_interaction" TIMESTAMP NOT NULL DEFAULT now() ,
+  "is_vendedor" BOOLEAN NULL DEFAULT false ,
+  "data_cadastro" TIMESTAMP NULL DEFAULT now() ,
+  CONSTRAINT "users_pkey" PRIMARY KEY ("user_id")
+);
+CREATE TABLE "public"."messages" ( 
+  "id" SERIAL,
+  "user_id" BIGINT NOT NULL,
+  "timestamp" TIMESTAMP NOT NULL DEFAULT now() ,
+  "role" VARCHAR(20) NOT NULL,
+  "content" TEXT NOT NULL,
+  "produto_id" INTEGER NULL,
+  CONSTRAINT "messages_pkey" PRIMARY KEY ("id")
+);
+CREATE TABLE "public"."produtos" ( 
+  "id" SERIAL,
+  "sku" VARCHAR(20) NOT NULL,
+  "produto" VARCHAR(100) NOT NULL,
+  "capacidade" VARCHAR(20) NOT NULL,
+  "preco_base" NUMERIC NOT NULL,
+  "desconto_max" NUMERIC NOT NULL,
+  "preco_dolar" NUMERIC NOT NULL,
+  "preco_euro" NUMERIC NOT NULL,
+  "descricao" TEXT NULL,
+  "categoria" VARCHAR(50) NULL,
+  "estoque_atual" INTEGER NULL DEFAULT 0 ,
+  "data_cadastro" TIMESTAMP NULL DEFAULT now() ,
+  "data_atualizacao" TIMESTAMP NULL DEFAULT now() ,
+  CONSTRAINT "produtos_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "produtos_sku_key" UNIQUE ("sku")
+);
+ALTER TABLE "public"."pedidos" ADD CONSTRAINT "pedidos_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users" ("user_id");
+ALTER TABLE "public"."pedido_itens" ADD CONSTRAINT "pedido_itens_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "public"."produtos" ("id");
+ALTER TABLE "public"."pedido_itens" ADD CONSTRAINT "pedido_itens_pedido_id_fkey" FOREIGN KEY ("pedido_id") REFERENCES "public"."pedidos" ("id");
+ALTER TABLE "public"."messages" ADD CONSTRAINT "messages_produto_id_fkey" FOREIGN KEY ("produto_id") REFERENCES "public"."produtos" ("id");
+ALTER TABLE "public"."messages" ADD CONSTRAINT "messages_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users" ("user_id");
